@@ -1,0 +1,35 @@
+<html layout:decorate="~{layout}" xmlns:layout="http://www.w3.org/1999/xhtml">
+
+<div class="container max600" layout:fragment="content">
+  <div class="py-5 text-center">
+    <h2>회원 목록</h2>
+  </div>
+  <div>
+    <table class="table table-hover text-center">
+      <thead class="table-dark">
+      <tr>
+        <th scope="col">No</th>
+        <th scope="col">아이디</th>
+        <th scope="col">이름</th>
+        <th scope="col">비밀번호</th>
+        <th scope="col">등급</th>
+        <th scope="col">수정</th>
+        <th scope="col">삭제</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="member:${members}">
+        <td th:text="${member.id}"></td>
+        <td th:text="${member.loginId}"></td>
+        <td th:text="${member.name}"></td>
+        <td th:text="${member.password}"></td>
+        <td th:text="${member.grade}"></td>
+        <td><a th:href="@{/members/{id}/edit (id=${member.id})}" class="btn btn-outline-primary" role="button">수정</a></td>
+        <td><a th:href="@{/members/{id}/delete (id=${member.id})}" class="btn btn-outline-danger" role="button">삭제</a></td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+  <button th:onclick="|location.href='@{/}'|" type="button" class="w-100 btn btn-outline-secondary btn-lg">돌아가기</button>
+</div>
+</html>
