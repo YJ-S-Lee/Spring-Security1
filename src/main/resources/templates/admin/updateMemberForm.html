@@ -5,7 +5,7 @@
     <h2>회원 수정</h2>
   </div>
   <h4 class="mb-3">회원 정보 수정</h4>
-  <form th:Object="${memberForm}" method="post">
+  <form th:action th:Object="${memberForm}" method="post">
     <input type="hidden" th:field="*{id}">
     <div class="mb-3">
       <label th:for="loginId" class="form-label">로그인 ID</label>

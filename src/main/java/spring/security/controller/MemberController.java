@@ -2,6 +2,9 @@ package spring.security.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -47,16 +50,26 @@ public class MemberController {
 
     //회원 목록
     @GetMapping(value = "/members")
-    public String list(@SessionAttribute(name = SessionConst.LOGIN_MEMBER, required = false)EzenMember loginMember, Model model){
+    public String list(Model model){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated() && !(authentication instanceof AnonymousAuthenticationToken)) {
+            String username = authentication.getName(); //현재 로그인한 사용자 이름
+            model.addAttribute("loginMember", username);
+        }
         List<EzenMember> members = memberService.findMemberList();
         model.addAttribute("members", members);
-        model.addAttribute("loginMember", loginMember);
+        //model.addAttribute("loginMember", loginMember);
         return "admin/memberList";
     }
 
     //수정하기(수정폼 보여주기)
     @GetMapping("/members/{id}/edit")
-    public String updateMemberForm(@SessionAttribute(name = SessionConst.LOGIN_MEMBER, required = false)EzenMember loginMember, @PathVariable("id") Long id, Model model) {
+    public String updateMemberForm(@PathVariable("id") Long id, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated() && !(authentication instanceof AnonymousAuthenticationToken)) {
+            String username = authentication.getName(); //현재 로그인한 사용자 이름
+            model.addAttribute("loginMember", username);
+        }
 
         EzenMember ezenMember = memberService.findOneMember(id).get();
 
@@ -69,16 +82,19 @@ public class MemberController {
         memberForm.setGrade(ezenMember.getGrade());
 
         model.addAttribute("memberForm", memberForm);
-        model.addAttribute("loginMember", loginMember);
 
         return "admin/updateMemberForm";
     }
 
     //수정하기(수정폼 저장하기)
     @PostMapping("/members/{id}/edit")
-    public String updateMemberFormSave(@SessionAttribute(name = SessionConst.LOGIN_MEMBER, required = false)EzenMember loginMember, @Valid @ModelAttribute("memberForm") MemberForm memberForm, BindingResult bindingResult,Model model) {
+    public String updateMemberFormSave(@Valid @ModelAttribute("memberForm") MemberForm memberForm, BindingResult bindingResult, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated() && !(authentication instanceof AnonymousAuthenticationToken)) {
+            String username = authentication.getName(); //현재 로그인한 사용자 이름
+            model.addAttribute("loginMember", username);
+        }
         if(bindingResult.hasErrors()) {
-            model.addAttribute("loginMember", loginMember);
             return "admin/updateMemberForm";
         }
 
@@ -87,11 +103,10 @@ public class MemberController {
         ezenMember.setId(memberForm.getId());
         ezenMember.setLoginId(memberForm.getLoginId());
         ezenMember.setName(memberForm.getName());
-        ezenMember.setPassword(memberForm.getPassword());
+        ezenMember.setPassword(passwordEncoder.encode(memberForm.getPassword()));
         ezenMember.setGrade(memberForm.getGrade());
 
         memberService.update(ezenMember);
-        model.addAttribute("loginMember", loginMember);
         return "redirect:/members";
     }
 
